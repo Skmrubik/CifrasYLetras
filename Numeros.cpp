@@ -78,6 +78,7 @@ void mostrar(solucion v){
     cout << v.operaciones[i][0] << v.operando[i]<< v.operaciones[i][1] << " = "<< v.operaciones[i][2] << endl;
   cout << endl;
 }
+
 void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j){
   int operacion;
   vector <int> op;
@@ -94,6 +95,7 @@ void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j
   aux.operaciones.push_back(op);
   acumulador.push_back(aux);
 }
+
 void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado, int prof){
   if(grupo[0].elementos.size()==prof){
     for(int i=0; i<grupo.size();i++){
