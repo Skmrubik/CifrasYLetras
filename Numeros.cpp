@@ -99,9 +99,7 @@ void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j
 void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado, int prof){
   if(grupo[0].elementos.size()==prof){
     for(int i=0; i<grupo.size();i++){
-      if(esta(grupo[i].elementos,resultado)){
-        mostrar(grupo[i]);
-      }
+      if(esta(grupo[i].elementos,resultado))      mostrar(grupo[i]);
     }
   }
   else{
