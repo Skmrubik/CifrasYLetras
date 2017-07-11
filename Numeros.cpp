@@ -57,63 +57,55 @@ void mostrar(solucion v){
   cout << endl;
 }
 //Funcion para evitar la repetición de código en la funcion cyl
-void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j){
+solucion codigo(solucion sol, char oper, int i, int j){
+  solucion s=sol;
   int operacion;
-  vector <int> op;
-  if(oper=='+')     operacion=aux.elementos[i] + aux.elementos[j];
-  if(oper=='-')     operacion=aux.elementos[i] - aux.elementos[j];
-  if(oper=='x')     operacion=aux.elementos[i] * aux.elementos[j];
-  if(oper=='/')     operacion=aux.elementos[i] / aux.elementos[j];
-  aux.operando.push_back(oper);
-  op.push_back(aux.elementos[i]);
-  op.push_back(aux.elementos[j]);
+  if(oper == '+')   operacion=s.elementos[i]+s.elementos[j];
+  if(oper == '-')   operacion=s.elementos[i]-s.elementos[j];
+  if(oper == 'x')   operacion=s.elementos[i]*s.elementos[j];
+  if(oper == '/')   operacion=s.elementos[i]/s.elementos[j];
+  vector<int> op;
+  op.push_back(s.elementos[i]);
+  op.push_back(s.elementos[j]);
   op.push_back(operacion);
-  borrar(aux.elementos,aux.elementos[i],aux.elementos[j]);
-  aux.elementos.push_back(operacion);
-  aux.operaciones.push_back(op);
-  acumulador.push_back(aux);
+  s.operaciones.push_back(op);
+  s.operando.push_back(oper);
+  borrar(s.elementos, s.elementos[i], s.elementos[j]);
+  s.elementos.push_back(operacion);
+  return s;
 }
-
-void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado, int prof, vector <int> elementos){
-  if(grupo[0].elementos.size()==prof){
-    for(int i=0; i<grupo.size();i++){
-      if(esta(grupo[i].elementos,resultado)){
-        for(int j=0; j<elementos.size(); j++)
-          cout << "| " << elementos[j] << " ";
-        cout << "|" << endl;
-        cout << "--------------------------------------------------------" << endl;
-        mostrar(grupo[i]);
-      }
-    }
+//La funcion encargada de ver que combinaciones de operaciones llegan al resultado
+void cyl(solucion sol, int resultado, vector<int> el){
+  if(sol.elementos.size()==1 ){
+    if(sol.elementos[0]==resultado)           mostrar(sol);
   }
+  else if(esta(sol.elementos, resultado))     mostrar(sol);
   else{
-    for(int a=0; a<grupo.size();a++){
-      for(int i=0; i<grupo[0].elementos.size(); i++){
-        for(int j=i+1; j<grupo[0].elementos.size(); j++){
-          operar(grupo[a],acumulador,'+',i,j);
-          operar(grupo[a],acumulador,'x',i,j);
+    solucion s;
+    for(int i=0; i<sol.elementos.size(); i++){
+      for(int j=i+1; j<sol.elementos.size();j++){
+        if(i<j){
+          s=codigo(sol,'+',i,j); //SUMA
+          cyl(s,resultado,el);
+          s=codigo(sol,'x',i,j); //MULTIPLICACION
+          cyl(s,resultado,el);
         }
-      }
-      for(int i=0; i<grupo[0].elementos.size(); i++){
-        for(int j=0; j<grupo[0].elementos.size(); j++){
-          if(i!=j){
-            if(restaPosible(grupo[a].elementos[i],grupo[a].elementos[j]))
-              operar(grupo[a], acumulador, '-',i,j);
-            if(divisionPosible(grupo[a].elementos[i],grupo[a].elementos[j]))
-              operar(grupo[a], acumulador, '/',i,j);
+        if(i!=j){
+          if(restaPosible(sol.elementos[i], sol.elementos[j])){
+            s=codigo(sol,'-',i,j);  //RESTA
+            cyl(s,resultado,el);
+          }
+          if(divisionPosible(sol.elementos[i], sol.elementos[j])){
+            s=codigo(sol,'/',i,j);  //DIVISION
+            cyl(s,resultado,el);
           }
         }
       }
     }
-    grupo.clear();
-    grupo=acumulador;
-    acumulador.clear();
-    cyl(grupo, acumulador, resultado, prof,elementos);
   }
 }
 
 int main(){
-  vector<solucion> grupo, acumulador;
   solucion v;
   int num=-1, resultado;
 
@@ -131,11 +123,5 @@ int main(){
 
   cout << "Ahora introduce el resultado a conseguir" << endl;
   cin >> resultado;
-
-  grupo.push_back(v);
-  for(int i=v.elementos.size()-1; i>0; i--){
-    cout << "CON " << v.elementos.size()-i << " OPERACIONES:" << endl;
-    cout << "_____________________" << endl;
-    cyl(grupo,acumulador,resultado,i,v.elementos);
-  }
+  cyl(v,resultado,v.elementos);
 }
