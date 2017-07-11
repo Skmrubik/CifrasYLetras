@@ -4,19 +4,12 @@ Dados unos números y un resultado a conseguir, con la combinacion de los númer
 #include <vector>
 #include <stdlib.h>
 using namespace std;
+
 struct solucion{
-  vector<int> elementos;
-  vector<vector<int> > operaciones;
-  vector<char> operando;
+  vector<int> elementos;    //elementos disponibles para realizar operaciones
+  vector<vector<int> > operaciones; //tripletas correspondientes a las operaciones hasta llegar a la solucion
+  vector<char> operando;    //vector de los operadores en orden
 };
-
-int suma(int a, int b){
-  return a+b;
-}
-
-int resta(int a, int b){
-  return a-b;
-}
 
 bool restaPosible(int a, int b){
   bool posible=true;
@@ -25,21 +18,13 @@ bool restaPosible(int a, int b){
   return posible;
 }
 
-int multiplicacion(int a, int b){
-  return a*b;
-}
-
-int division(int a, int b){
-  return a/b;
-}
-
 bool divisionPosible(int a, int b){
   bool posible=false;
   if(a>b)
     if(a%b==0)    posible=true;
   return posible;
 }
-
+//En el vector v busca los enteros a y b y los borra
 void borrar(vector<int> &v,int a, int b){
   int i=0, tam=v.size();
   bool encA=false, encB=false;
@@ -58,7 +43,7 @@ void borrar(vector<int> &v,int a, int b){
       i++;
   }
 }
-
+//Esta el entero result en el vector v?
 bool esta(vector<int> v, int result){
   bool esta=false;
   for(int i=0; i<v.size() and !esta; i++)
@@ -66,26 +51,19 @@ bool esta(vector<int> v, int result){
   return esta;
 }
 
-bool esta2(vector <vector <int> > v, int result){
-  bool esta2=false;
-  for(int i=0; i<v.size() and !esta2; i++)
-    if(esta(v[i],result))    esta2=true;
-  return esta2;
-}
-
 void mostrar(solucion v){
   for(int i=0; i<v.operaciones.size(); i++)
     cout << v.operaciones[i][0] << v.operando[i]<< v.operaciones[i][1] << " = "<< v.operaciones[i][2] << endl;
   cout << endl;
 }
-
+//Funcion para evitar la repetición de código en la funcion cyl
 void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j){
   int operacion;
   vector <int> op;
-  if(oper=='+')     operacion=suma(aux.elementos[i],aux.elementos[j]);
-  if(oper=='-')     operacion=resta(aux.elementos[i],aux.elementos[j]);
-  if(oper=='x')     operacion=multiplicacion(aux.elementos[i],aux.elementos[j]);
-  if(oper=='/')     operacion=division(aux.elementos[i],aux.elementos[j]);
+  if(oper=='+')     operacion=aux.elementos[i] + aux.elementos[j];
+  if(oper=='-')     operacion=aux.elementos[i] - aux.elementos[j];
+  if(oper=='x')     operacion=aux.elementos[i] * aux.elementos[j];
+  if(oper=='/')     operacion=aux.elementos[i] / aux.elementos[j];
   aux.operando.push_back(oper);
   op.push_back(aux.elementos[i]);
   op.push_back(aux.elementos[j]);
@@ -96,10 +74,16 @@ void operar(solucion aux, vector <solucion> &acumulador, char oper, int i, int j
   acumulador.push_back(aux);
 }
 
-void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado, int prof){
+void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado, int prof, vector <int> elementos){
   if(grupo[0].elementos.size()==prof){
     for(int i=0; i<grupo.size();i++){
-      if(esta(grupo[i].elementos,resultado))      mostrar(grupo[i]);
+      if(esta(grupo[i].elementos,resultado)){
+        for(int j=0; j<elementos.size(); j++)
+          cout << "| " << elementos[j] << " ";
+        cout << "|" << endl;
+        cout << "--------------------------------------------------------" << endl;
+        mostrar(grupo[i]);
+      }
     }
   }
   else{
@@ -124,7 +108,7 @@ void cyl(vector <solucion > grupo, vector <solucion > acumulador, int resultado,
     grupo.clear();
     grupo=acumulador;
     acumulador.clear();
-    cyl(grupo, acumulador, resultado, prof);
+    cyl(grupo, acumulador, resultado, prof,elementos);
   }
 }
 
@@ -152,6 +136,6 @@ int main(){
   for(int i=v.elementos.size()-1; i>0; i--){
     cout << "CON " << v.elementos.size()-i << " OPERACIONES:" << endl;
     cout << "_____________________" << endl;
-    cyl(grupo,acumulador,resultado,i);
+    cyl(grupo,acumulador,resultado,i,v.elementos);
   }
 }
