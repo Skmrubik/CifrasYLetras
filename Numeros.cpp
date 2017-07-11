@@ -4,7 +4,7 @@ Dados unos números y un resultado a conseguir, con la combinacion de los númer
 #include <vector>
 #include <stdlib.h>
 using namespace std;
-
+static int cont=0;
 struct solucion{
   vector<int> elementos;    //elementos disponibles para realizar operaciones
   vector<vector<int> > operaciones; //tripletas correspondientes a las operaciones hasta llegar a la solucion
@@ -74,41 +74,92 @@ solucion codigo(solucion sol, char oper, int i, int j){
   s.elementos.push_back(operacion);
   return s;
 }
-//La funcion encargada de ver que combinaciones de operaciones llegan al resultado
-void cyl(solucion sol, int resultado, vector<int> el){
-  if(sol.elementos.size()==1 ){
-    if(sol.elementos[0]==resultado)           mostrar(sol);
+//Devuelve todas las soluciones posibles
+void cyl(solucion sol, int resultado, int tam, vector<int> el){
+  if(tam==1 ){
+    if(sol.elementos[0]==resultado){
+      mostrar(sol);
+      cont++;
+    }
   }
-  else if(esta(sol.elementos, resultado))     mostrar(sol);
+  else if(esta(sol.elementos, resultado)){
+    mostrar(sol);
+    cont++;
+  }
   else{
+    int operacion;
     solucion s;
-    for(int i=0; i<sol.elementos.size(); i++){
-      for(int j=i+1; j<sol.elementos.size();j++){
-        if(i<j){
-          s=codigo(sol,'+',i,j); //SUMA
-          cyl(s,resultado,el);
-          s=codigo(sol,'x',i,j); //MULTIPLICACION
-          cyl(s,resultado,el);
-        }
+    for(int i=0; i<tam; i++){
+      for(int j=i+1; j<tam;j++){
+        s=codigo(sol,'+',i,j); //SUMA
+        cyl(s,resultado,tam-1,el);
+        s=codigo(sol,'x',i,j); //MULTIPLICACION
+        cyl(s,resultado,tam-1,el);
+      }
+    }
+    for(int i=0; i<tam; i++){
+      for(int j=0; j<tam;j++){
         if(i!=j){
           if(restaPosible(sol.elementos[i], sol.elementos[j])){
             s=codigo(sol,'-',i,j);  //RESTA
-            cyl(s,resultado,el);
+            cyl(s,resultado,tam-1,el);
           }
           if(divisionPosible(sol.elementos[i], sol.elementos[j])){
             s=codigo(sol,'/',i,j);  //DIVISION
-            cyl(s,resultado,el);
+            cyl(s,resultado,tam-1,el);
           }
         }
       }
     }
   }
 }
-
+//Devuelve una solucion para cada N numero de operandos
+void cyl(solucion sol, int resultado, int tam, vector<int> el, vector <bool> &rep){
+  if(esta(sol.elementos, resultado) and !rep[tam]){
+    rep[tam]=true;
+    cout << "CON " << el.size()-tam << " OPERACIONES: " << endl;
+    cout << "_____________________________________" << endl;
+    mostrar(sol);
+    cont++;
+  }
+  else{
+    int operacion;
+    solucion s;
+    for(int i=0; i<tam; i++){
+      for(int j=i+1; j<tam;j++){
+        s=codigo(sol,'+',i,j); //SUMA
+        cyl(s,resultado,tam-1,el,rep);
+        s=codigo(sol,'x',i,j); //MULTIPLICACION
+        cyl(s,resultado,tam-1,el,rep);
+      }
+    }
+    for(int i=0; i<tam; i++){
+      for(int j=0; j<tam;j++){
+        if(i!=j){
+          if(restaPosible(sol.elementos[i], sol.elementos[j])){
+            s=codigo(sol,'-',i,j);  //RESTA
+            cyl(s,resultado,tam-1,el,rep);
+          }
+          if(divisionPosible(sol.elementos[i], sol.elementos[j])){
+            s=codigo(sol,'/',i,j);  //DIVISION
+            cyl(s,resultado,tam-1,el,rep);
+          }
+        }
+      }
+    }
+  }
+}
 int main(){
   solucion v;
   int num=-1, resultado;
-
+  vector <bool> rep;
+  int modo;
+  system("clear");
+  cout << "MODO DE USO: " << endl;
+  cout << "Quieres que aparezcan (selecciona 1 o 2):" << endl;
+  cout << "1. Todas las soluciones posibles" << endl;
+  cout << "2. Solo una solucion para cada numero N de operaciones en el calculo de la solucion " << endl;
+  cin >> modo;
   while(num!=0){
     system("clear");
     cout << "NUMEROS A OPERAR" << endl;
@@ -120,8 +171,12 @@ int main(){
     if(num!=0)
       v.elementos.push_back(num);
   }
-
+  for(int i=0; i<v.elementos.size(); i++){
+    rep.push_back(false);
+  }
   cout << "Ahora introduce el resultado a conseguir" << endl;
   cin >> resultado;
-  cyl(v,resultado,v.elementos);
+  if(modo ==1)    cyl(v,resultado,v.elementos.size(),v.elementos);
+  if(modo ==2)    cyl(v,resultado,v.elementos.size(),v.elementos,rep);
+  cout << "SOLUCIONES ENCONTRADAS: " << cont << endl;
 }
